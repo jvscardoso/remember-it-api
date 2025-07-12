@@ -7,6 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tasks     Task[]   @relation("UserTasks")
+}
+
 model Task {
   id          String     @id @default(uuid())
   title       String
@@ -14,6 +24,9 @@ model Task {
   status      TaskStatus @default(PENDING)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  userId      String
+
+  user User @relation("UserTasks", fields: [userId], references: [id])
 }
 
 enum TaskStatus {
