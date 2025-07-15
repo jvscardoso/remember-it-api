@@ -12,13 +12,12 @@ import {
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { Task, TaskStatus } from '@prisma/client';
-import { AuthGuard } from '@nestjs/passport';
 import { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 import { CreateTaskDto } from './dto/create-tasks.dto';
 import { UpdateTaskDto } from './dto/update-tasks.dto';
 import { JwtAuthGuard } from '../auth/jtw-auth.guard';
 
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
 @Controller('tasks')
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}

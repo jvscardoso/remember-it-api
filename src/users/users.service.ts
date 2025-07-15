@@ -43,17 +43,39 @@ export class UsersService {
     }
   }
 
-  async findById(id: string) {
-    return this.prisma.user.findUnique({
-      where: { id },
+  async findById(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
       select: {
         id: true,
         email: true,
         name: true,
         createdAt: true,
-        password: false,
       },
     });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const [totalTasks, completedTasks, inProgressTasks] = await Promise.all([
+      this.prisma.task.count({ where: { userId } }),
+      this.prisma.task.count({ where: { userId, status: 'COMPLETED' } }),
+      this.prisma.task.count({ where: { userId, status: 'IN_PROGRESS' } }),
+    ]);
+
+    const completedPercentage =
+      totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+
+    return {
+      ...user,
+      stats: {
+        totalTasks,
+        completedTasks,
+        inProgressTasks,
+        completedPercentage: Number(completedPercentage.toFixed(2)), // ex: 75.33
+      },
+    };
   }
 
   async findByEmail(email: string) {
